@@ -1,7 +1,8 @@
+from trackers.tracker import draw_annotations
 from utils import read_video, save_video
 from trackers import Tracker
 from team_assigner import TeamAssigner
-import cv2
+
 
 def main():
     # read video
@@ -13,9 +14,9 @@ def main():
     tracks = tracker.get_object_tracks(video_frames,
                                        read_from_stub=True,
                                        stub_path='stubs/track_stubs.pkl')
-    
+
     # interpolate ball positions
-    #tracks['Ball'] = tracker.interpolate_ball_position(tracks['Ball'])
+    # tracks['Ball'] = tracker.interpolate_ball_position(tracks['Ball'])
 
     # assign player teams
     team_assigner = TeamAssigner()
@@ -28,12 +29,12 @@ def main():
             tracks['Player'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
 
     # draw output
-    ## draw object tracks
-    output_video_frames = tracker.draw_annotations(video_frames, tracks)
-    
+    # draw object tracks
+    output_video_frames = draw_annotations(video_frames, tracks)
+
     # save video
-    save_video(output_video_frames, 'output_videos/output_video.avi')
+    save_video(output_video_frames, 'output_videos/output_video.mp4')
+
 
 if __name__ == '__main__':
     main()
- 
