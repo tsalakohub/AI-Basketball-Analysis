@@ -5,6 +5,7 @@ import os
 import numpy as np
 import cv2
 import sys
+import pandas as pd
 sys.path.append('../')
 from utils import get_center_of_bbox, get_bbox_width
 
@@ -12,6 +13,19 @@ class Tracker:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
         self.tracker =  sv.ByteTrack()
+
+    def interpolate_ball_position(self, ball_positions):
+
+        ball_positions = [x.get(1,{}).get('bbox',[]) for x in ball_positions]
+        df_ball_positions = pd.DataFrame(ball_positions, columns=['x1','y1','x2','y2'])
+
+        # interpolate missing values
+        df_ball_positions = df_ball_positions.interpolate()
+        df_ball_positions = df_ball_positions.bfill()
+
+        ball_positions = [{1:{'bbox':x}} for x in df_ball_positions.to_numpy().tolist()]
+
+        return ball_positions
 
     def detect_frames(self, frames):
         batch_size = 20
@@ -112,7 +126,7 @@ class Tracker:
             cv2.putText(
                 frame,
                 f"{track_id}",
-                (int(x1_text), int(y2_rect+15)),
+                (int(x1_text), int(y2_rect)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
                 (0,0,0),
@@ -120,6 +134,7 @@ class Tracker:
             )
 
         return frame
+    
     def draw_triangle(self, frame, bbox, color):
         y= int(bbox[1])
         x,_ = get_center_of_bbox(bbox)
@@ -144,15 +159,16 @@ class Tracker:
 
             # Draw player 
             for track_id, player in player_dict.items():
-                frame = self.draw_ellipse(frame, player["bbox"],(0,0,255), track_id)
+                color = player.get("team_color", (0,0,255))
+                frame = self.draw_ellipse(frame, player["bbox"],color, track_id)
 
             # Draw ref
-            for track_id, ref in ref_dict.items():
-                frame = self.draw_ellipse(frame, ref["bbox"],(0,255,255))
+            # for track_id, ref in ref_dict.items():
+            #     frame = self.draw_ellipse(frame, ref["bbox"],(0,255,255))
 
             # Draw ball
-            for track_id, ball in ball_dict.items():
-                frame = self.draw_triangle(frame, ball["bbox"], (0,255,0))
+            # for track_id, ball in ball_dict.items():
+            #     frame = self.draw_triangle(frame, ball["bbox"], (0,255,0))
 
             output_video_frames.append(frame)
 
