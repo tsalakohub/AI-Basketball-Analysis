@@ -1,7 +1,9 @@
+from camera_movement_estimator.camera_movement_estimator import draw_camera_movement
 from trackers.tracker import draw_annotations
 from utils import read_video, save_video
 from trackers import Tracker
 from team_assigner import TeamAssigner
+from camera_movement_estimator import CameraMovementEstimator
 
 
 def main():
@@ -14,6 +16,12 @@ def main():
     tracks = tracker.get_object_tracks(video_frames,
                                        read_from_stub=True,
                                        stub_path='stubs/track_stubs.pkl')
+
+    # camera movement estimation
+    camera_movement_estimator = CameraMovementEstimator(video_frames[0])
+    camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames,
+                                                                              read_from_stub=True,
+                                                                              stub_path='stubs/camera_movement_stubs.pkl')
 
     # interpolate ball positions
     # tracks['Ball'] = tracker.interpolate_ball_position(tracks['Ball'])
@@ -31,6 +39,9 @@ def main():
     # draw output
     # draw object tracks
     output_video_frames = draw_annotations(video_frames, tracks)
+
+    # draw camera movement
+    output_video_frames = draw_camera_movement(output_video_frames, camera_movement_per_frame)
 
     # save video
     save_video(output_video_frames, 'output_videos/output_video.mp4')
