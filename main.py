@@ -4,6 +4,7 @@ from utils import read_video, save_video
 from trackers import Tracker
 from team_assigner import TeamAssigner
 from camera_movement_estimator import CameraMovementEstimator
+import cv2
 
 
 def main():
@@ -12,6 +13,8 @@ def main():
 
     # initialize tracker
     tracker = Tracker('models/best.pt')
+
+    # cv2.imwrite(f'output_videos/first_frame.jpg', video_frames[0])
 
     tracks = tracker.get_object_tracks(video_frames,
                                        read_from_stub=True,
