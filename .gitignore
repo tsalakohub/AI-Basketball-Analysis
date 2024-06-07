@@ -1,1 +1,2 @@
-models/*
+models/best.pt
+models/last.pt
