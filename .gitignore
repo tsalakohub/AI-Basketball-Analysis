@@ -1,2 +1,6 @@
 models/best.pt
 models/last.pt
+camera_movement_estimator/__pycache__
+team_assigner/__pycache__
+trackers/__pycache__
+utils/__pycache__
